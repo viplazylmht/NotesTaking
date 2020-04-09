@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/listNotesFragment">
+
+
+    <fragment
+        android:id="@+id/listNotesFragment"
+        android:name="com.viplazy.notestaking.ui.main.ListNotesFragment"
+        android:label="ListNotesFragment"
+        tools:layout="@layout/list_notes_fragment_layout">
+
+        <action
+            android:id="@+id/action_listNotesFragment_to_noteDetailFragment"
+            app:destination="@id/noteDetailFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+
+        <argument
+            android:name="noteId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/noteDetailFragment"
+        android:name="com.viplazy.notestaking.ui.main.NoteDetailFragment"
+        android:label="NoteDetailFragment"
+        tools:layout="@layout/note_detail_fragment" >
+        <action
+            android:id="@+id/action_noteDetailFragment_to_addTagFragment"
+            app:destination="@id/addTagFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+
+        <argument
+            android:name="noteId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/addTagFragment"
+        android:name="com.viplazy.notestaking.ui.main.AddTagFragment"
+        android:label="fragment_add_tag"
+        tools:layout="@layout/fragment_add_tag" />
+</navigation>
