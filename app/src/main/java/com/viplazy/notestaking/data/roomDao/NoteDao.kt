@@ -3,7 +3,6 @@ package com.viplazy.notestaking.data.roomDao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.viplazy.notestaking.data.roomDatabase.RoomNote
-import java.sql.Timestamp
 
 @Dao
 // https://stackoverflow.com/questions/44330452/android-persistence-room-cannot-figure-out-how-to-read-this-field-from-a-curso/44424148#44424148
@@ -11,6 +10,9 @@ interface NoteDao {
 
     @Query("SELECT * FROM NoteList WHERE isDeleted = 0") // 0 is false, 1 is true
     fun getNotes(): LiveData<List<RoomNote>>
+
+    @Query("SELECT * FROM NoteList WHERE isDeleted = 0 AND noteId IN (:notes)")
+    fun getNotes(notes: List<Int>): List<RoomNote>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertNotes(vararg notes: RoomNote)

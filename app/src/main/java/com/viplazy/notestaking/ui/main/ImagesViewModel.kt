@@ -2,8 +2,10 @@ package com.viplazy.notestaking.ui.main
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.viplazy.notestaking.data.roomDatabase.ImageDatabase
 import com.viplazy.notestaking.data.roomDatabase.NoteListImage
@@ -14,6 +16,8 @@ class ImagesViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repoImage : ImageRepository
     var listImages: LiveData<List<NoteListImage>>? = null
+
+    val selectedBitmap: MutableLiveData<Bitmap?> = MutableLiveData(null)
 
     init {
         val imageDao = ImageDatabase.getDatabase(application, viewModelScope).imageDao()

@@ -3,13 +3,16 @@ package com.viplazy.notestaking.data.roomRepository
 import androidx.lifecycle.LiveData
 import com.viplazy.notestaking.data.roomDao.NoteDao
 import com.viplazy.notestaking.data.roomDatabase.RoomNote
-import java.sql.Timestamp
 
 class NoteRepository(private val noteDao: NoteDao) {
 
     // Room executes all queries on a separate thread.
     // Observed LiveData will notify the observer when the data has changed.
     val allNote: LiveData<List<RoomNote>> = noteDao.getNotes()
+
+    fun getNotes(noteIds: List<Int>): List<RoomNote> {
+        return noteDao.getNotes(noteIds)
+    }
 
     suspend fun insertAll(vararg note: RoomNote) {
         noteDao.insertNotes(*note)

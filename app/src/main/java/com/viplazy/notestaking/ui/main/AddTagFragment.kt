@@ -3,7 +3,10 @@ package com.viplazy.notestaking.ui.main
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.*
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -11,7 +14,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.RecyclerView
 import com.viplazy.notestaking.R
 import com.viplazy.notestaking.data.roomDatabase.NoteTag
 import kotlinx.android.synthetic.main.fragment_add_tag.*
@@ -89,7 +91,7 @@ class AddTagFragment : Fragment() {
         adapter = ArrayAdapter<String>(activity!!, android.R.layout.simple_list_item_1, listOf())
         list_avail_tag.adapter = adapter
 
-        list_avail_tag.setOnItemClickListener { parent, view, position, id ->
+        list_avail_tag.setOnItemClickListener { _, _, position, _ ->
             edt_tag_name.setText(adapter.getItem(position))
         }
     }
@@ -128,7 +130,7 @@ class AddTagFragment : Fragment() {
         view?.requestFocus()
 
         view?.setOnKeyListener( View.OnKeyListener { v, keyCode, event ->
-            if( keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+            if( keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
 
                 edt_tag_name.clearFocus()
 

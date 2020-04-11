@@ -66,4 +66,12 @@ class TagRepository(private val tagDao: TagDao) {
             }
         }
     }
+
+    suspend fun checkTagNameExist(tagName: String): Boolean {
+        return (tagDao.checkTagNameExist(tagName) > 0)
+    }
+
+    fun getTags(tagNames: List<String>): List<NoteTag> {
+        return tagDao.getTags(tagNames)
+    }
 }

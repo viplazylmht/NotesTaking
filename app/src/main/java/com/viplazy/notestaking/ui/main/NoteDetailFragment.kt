@@ -3,44 +3,36 @@ package com.viplazy.notestaking.ui.main
 import android.Manifest
 import android.app.Activity
 import android.app.Dialog
-import android.app.SearchManager
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.LiveData
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import androidx.room.Room
 import com.cunoraz.tagview.Tag
 import com.viplazy.notestaking.R
 import com.viplazy.notestaking.common.ImageUtil
 import com.viplazy.notestaking.common.ImageUtil.getThumbnail
 import com.viplazy.notestaking.common.ListImageAdapter
-import com.viplazy.notestaking.common.ListNoteAdapter
 import com.viplazy.notestaking.data.roomDatabase.NoteListImage
 import com.viplazy.notestaking.data.roomDatabase.NoteTag
 import com.viplazy.notestaking.data.roomDatabase.RoomNote
 import com.viplazy.notestaking.ui.main.ListNotesFragment.Companion.showSnackBar
 import kotlinx.android.synthetic.main.note_detail_fragment.*
-import java.text.FieldPosition
 import java.util.*
 
-class NoteDetailFragment() : Fragment(), ListImageAdapter.ImageClickListener, ListImageAdapter.OnItemDeleteListener {
+class NoteDetailFragment : Fragment(), ListImageAdapter.ImageClickListener, ListImageAdapter.OnItemDeleteListener {
 
     companion object {
         const val DEFAULT_NOTE_ID = -1
@@ -161,7 +153,7 @@ class NoteDetailFragment() : Fragment(), ListImageAdapter.ImageClickListener, Li
         view?.requestFocus()
 
         view?.setOnKeyListener( View.OnKeyListener { v, keyCode, event ->
-            if( keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+            if( keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
 
                 val dialog = AlertDialog.Builder(activity!!).create()
                 dialog.setMessage(getString(R.string.dialog_quit_message))
@@ -359,12 +351,61 @@ class NoteDetailFragment() : Fragment(), ListImageAdapter.ImageClickListener, Li
         when (isLongClick) {
 
             true -> {
-                // to do
+
             }
 
             false -> {
                 if (imageAdapter.currentList[position].path == "%add%") {
                     requestImageFromDevice()
+                }
+                else {
+                    // request save this note if necessary
+                    val dialog = AlertDialog.Builder(activity!!).create()
+                    dialog.setMessage(getString(R.string.dialog_quit_message))
+                    dialog.setButton(Dialog.BUTTON_POSITIVE, "SAVE", DialogInterface.OnClickListener { dialog, which ->
+
+                        saveNote()
+                        dialog.dismiss()
+
+                        // navigate to a right image
+                        viewModelImage.selectedBitmap.postValue(imageAdapter.currentList[position].getImageBitmap(activity!!))
+                        navController.navigate(R.id.action_noteDetailFragment_to_imageDialogFragment)
+                    })
+
+                    dialog.setButton(Dialog.BUTTON_NEGATIVE, "DISCARD", DialogInterface.OnClickListener { dialog, which ->
+
+                        showSnackBar("Discarded", parent = this.main)
+                        dialog.dismiss()
+
+                        // navigate to a right image
+                        viewModelImage.selectedBitmap.postValue(imageAdapter.currentList[position].getImageBitmap(activity!!))
+                        navController.navigate(R.id.action_noteDetailFragment_to_imageDialogFragment)
+
+                    })
+
+                    dialog.setButton(Dialog.BUTTON_NEUTRAL, "CANCEL", DialogInterface.OnClickListener{ dialog, which ->
+                        dialog.cancel()
+                    })
+
+                    val newNote = viewModel.curNote?.value
+                    newNote?.let {
+                        if (edt_title.text.toString() != it.title
+                            || edt_content.text.toString() != it.content) {
+                            dialog.show()
+                        }
+                        else {
+                            // navigate to a right image
+                            viewModelImage.selectedBitmap.postValue(imageAdapter.currentList[position].getImageBitmap(activity!!))
+                            navController.navigate(R.id.action_noteDetailFragment_to_imageDialogFragment)
+                        }
+                    }
+
+                    if (newNote == null) {
+                        if (edt_title.text.toString() != ""
+                            || edt_content.text.toString() != "") {
+                            dialog.show()
+                        }
+                    }
                 }
             }
         }

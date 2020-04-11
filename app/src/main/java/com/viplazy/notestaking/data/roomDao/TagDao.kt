@@ -10,6 +10,9 @@ interface TagDao {
     @Query("SELECT * FROM TagList WHERE isDeleted = 0")
     fun getTags(): LiveData<List<NoteTag>>
 
+    @Query("SELECT * FROM TagList WHERE isDeleted = 0 AND tagName IN (:tagNames)")
+    fun getTags(tagNames: List<String>): List<NoteTag>
+
     @Query("SELECT tagName FROM TagList WHERE isDeleted = 0")
     fun getTagNames(): LiveData<List<String>>
 
@@ -41,4 +44,9 @@ interface TagDao {
 
     @Query("SELECT * FROM TagList WHERE tagName = :tagName")
     fun getTagByTagName(tagName: String) : NoteTag?
+
+    @Query("SELECT EXISTS(SELECT * FROM TagList WHERE tagName = :tagName)")
+    fun checkTagNameExist(tagName: String): Int
+
+
 }

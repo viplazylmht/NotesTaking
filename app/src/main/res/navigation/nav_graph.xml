@@ -42,10 +42,24 @@
             android:name="noteId"
             app:argType="integer"
             android:defaultValue="0" />
+
+        <action
+            android:id="@+id/action_noteDetailFragment_to_imageDialogFragment"
+            app:destination="@id/imageDialogFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"/>
+
     </fragment>
     <fragment
         android:id="@+id/addTagFragment"
         android:name="com.viplazy.notestaking.ui.main.AddTagFragment"
         android:label="fragment_add_tag"
         tools:layout="@layout/fragment_add_tag" />
+    <fragment
+        android:id="@+id/imageDialogFragment"
+        android:name="com.viplazy.notestaking.ui.main.ImageDialogFragment"
+        android:label="fragment_image_dialog"
+        tools:layout="@layout/fragment_image_dialog" />
 </navigation>

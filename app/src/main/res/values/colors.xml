@@ -10,7 +10,7 @@
     <color name="color_secondary_title_item">#AD4B3C3C</color>
     <color name="color_white">@android:color/white</color>
     <color name="color_yellow">#FFFF00</color>
-    <color name="color_image_border">#FFB33333</color>
+    <color name="color_image_border">#B33333</color>
     <color name="color_default_button">#10101010</color>
 
 </resources>

@@ -6,30 +6,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import com.viplazy.notestaking.data.roomDatabase.*
-import com.viplazy.notestaking.data.roomRepository.ImageRepository
+import com.viplazy.notestaking.data.roomDatabase.NoteDatabase
+import com.viplazy.notestaking.data.roomDatabase.NoteTag
+import com.viplazy.notestaking.data.roomDatabase.RoomNote
+import com.viplazy.notestaking.data.roomDatabase.TagDatabase
 import com.viplazy.notestaking.data.roomRepository.NoteRepository
 import com.viplazy.notestaking.data.roomRepository.TagRepository
 import kotlinx.coroutines.launch
+import java.util.*
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
-        const val SCREEN_LISTS = 1
-        const val SCREEN_DETAILS = 2
         const val NO_DATE_FILTER: Long = -1
     }
 
-    val curFragment = MutableLiveData<Int>()
-    val startFilter = MutableLiveData<Long>()
-    val endFilter = MutableLiveData<Long>()
-    val selectedPos = MutableLiveData<Int>()
+    val selectedPos = MutableLiveData<Int>(RecyclerView.NO_POSITION)
+
+    // filter
+    val startFilter = MutableLiveData<Long>(NO_DATE_FILTER)
+    val endFilter = MutableLiveData<Long>(NO_DATE_FILTER)
+    val checkTagName = MutableLiveData<Boolean>(false)
+    val tagsFilter = MutableLiveData<MutableList<String>>(mutableListOf())
+
+    val listNoteFilter = MutableLiveData<List<RoomNote>>(listOf())
+
 
     private val repoNote : NoteRepository
     private val repoTag: TagRepository
 
-    var listNoteTitle: LiveData<List<RoomNote>>
+    val listNoteTitle: LiveData<List<RoomNote>>
     val listTagName: LiveData<List<String>>
 
     var curNote: LiveData<RoomNote>? = null
@@ -37,14 +43,8 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     var curTags: LiveData<List<NoteTag>>? = null
     var curTagsExclude: LiveData<List<NoteTag>>? = null
 
+
     init {
-        curFragment.value = SCREEN_LISTS
-
-        startFilter.postValue(NO_DATE_FILTER)
-        endFilter.postValue(NO_DATE_FILTER)
-
-        selectedPos.value = RecyclerView.NO_POSITION
-
         val noteDao = NoteDatabase.getDatabase(application, viewModelScope).noteDao()
         repoNote = NoteRepository(noteDao)
 
@@ -128,5 +128,31 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         repoNote.moveNoteToBin(noteId)
     }
 
+    fun checkTagNameExist(tagName: String) = viewModelScope.launch {
+        checkTagName.postValue(repoTag.checkTagNameExist(tagName))
+    }
 
+    fun getAllNote(tags: MutableList<String>) = viewModelScope.launch {
+
+        val tagList = repoTag.getTags(tags)
+
+        val noteId = mutableListOf<Int>()
+
+        tagList.let {
+            for (tag in it) {
+                val s =tag.inNoteIds.substring(1 until tag.inNoteIds.length)
+                val tokenizer = StringTokenizer(s, "||")
+
+                while (tokenizer.hasMoreTokens()) {
+                    val token = tokenizer.nextToken()
+                    if (token.isNotEmpty()) {
+                        val id = token.toInt()
+                        if (id !in noteId) noteId.add(id)
+                    }
+                }
+            }
+        }
+
+        listNoteFilter.postValue(repoNote.getNotes(noteId))
+    }
 }

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -134,34 +132,51 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <RelativeLayout
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_marginEnd="20dp"
                     android:layout_marginStart="20dp"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/btn_trans_stroke">
 
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="7"
+                        android:background="@drawable/btn_trans_stroke"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:layout_marginEnd="10dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:background="@drawable/btn_trans_background"
                             android:id="@+id/edt_tag_name"
+                            android:maxLines="1"
+                            android:maxLength="20"
+
+                            android:inputType="text"
                             android:hint="@string/tag_name_hint" />
 
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
                     <Button
-                        android:layout_alignParentRight="true"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:text="@string/add"
+                        android:layout_weight="3"
                         android:background="@drawable/btn_trans_stroke"
                         android:layout_height="wrap_content"
                         android:id="@+id/btn_add_tag"/>
-                </RelativeLayout>
+
+                </LinearLayout>
 
                 <com.cunoraz.tagview.TagView xmlns:tagview="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/tag_group"
@@ -184,30 +199,23 @@
         android:id="@+id/action_dilog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="8dp"
         android:background="@color/color_default_button"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/btn_cancel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:background="@drawable/btn_trans_background"
-            android:layout_weight="1"
-            android:text="@string/cancel" />
-
-        <Button
             android:id="@+id/btn_apply"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:layout_height="wrap_content"
             android:background="@drawable/btn_trans_background"
-            android:layout_weight="1"
             android:text="@string/apply" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

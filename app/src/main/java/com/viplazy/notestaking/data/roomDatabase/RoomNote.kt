@@ -2,7 +2,10 @@ package com.viplazy.notestaking.data.roomDatabase
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.viplazy.notestaking.common.ImageUtil
 
 @Entity (tableName = "NoteList")
@@ -49,7 +52,7 @@ data class NoteListImage(
 
 
 
-    fun getImageBitmap(context: Context, path: String): Bitmap? {
+    fun getImageBitmap(context: Context, path: String = this.path): Bitmap? {
 
         if (image == null) {
             image = ImageUtil.loadBitmap(context, path)

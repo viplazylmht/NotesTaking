@@ -1,14 +1,12 @@
 package com.viplazy.notestaking.ui.main
 
-import android.R.layout
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
-import android.widget.CursorAdapter
 import android.widget.FrameLayout
 import android.widget.SearchView
-import android.widget.SimpleCursorAdapter
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -18,16 +16,15 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cunoraz.tagview.Tag
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.viplazy.notestaking.R
 import com.viplazy.notestaking.common.ListNoteAdapter
-import com.viplazy.notestaking.common.TagSuggestionAdapter
 import com.viplazy.notestaking.data.roomDatabase.RoomNote
 import kotlinx.android.synthetic.main.dialog_filter_layout.*
 import kotlinx.android.synthetic.main.list_notes_fragment_layout.*
 import java.util.*
-
 
 class ListNotesFragment : Fragment(), ListNoteAdapter.NoteClickListener {
 
@@ -126,6 +123,28 @@ class ListNotesFragment : Fragment(), ListNoteAdapter.NoteClickListener {
         dialogFilter.apply {
             setContentView(R.layout.dialog_filter_layout)
 
+            setCancelable(false)
+            setCanceledOnTouchOutside(false)
+
+            btn_apply.setOnClickListener {
+
+                cancel()
+            }
+
+            btn_add_tag.setOnClickListener {
+                viewModel.checkTagNameExist(edt_tag_name.text.toString().trim())
+            }
+
+            tag_group.setOnTagDeleteListener { view, tag, position ->
+                val str = tag.text
+                tag_group.remove(position)
+
+                viewModel.tagsFilter.value?.remove(str)
+
+                // call to observer it normally by change value of LiveData
+                viewModel.tagsFilter.postValue(viewModel.tagsFilter.value)
+            }
+
             edt_start.setOnClickListener { editField ->
 
                 val calendar = if (viewModel.startFilter.value != NotesViewModel.NO_DATE_FILTER) {
@@ -198,14 +217,90 @@ class ListNotesFragment : Fragment(), ListNoteAdapter.NoteClickListener {
             }
         }
 
+        viewModel.checkTagName.observe(viewLifecycleOwner, Observer {
+
+            it?.let {
+                if (!this::dialogFilter.isInitialized || dialogFilter.edt_tag_name.text.toString().trim().isEmpty()) return@let
+                if (it) {
+                    viewModel.tagsFilter.value?.add(dialogFilter.edt_tag_name.text.toString().trim())
+
+                    // call to observer it normally by change value of LiveData
+                    viewModel.tagsFilter.postValue(viewModel.tagsFilter.value)
+
+                    dialogFilter.edt_tag_name.setText("")
+                    showSnackBar("Tag filter added!", parent = dialogFilter.container_filter)
+                }
+                else {
+                    showSnackBar("Tag name cannot be found!", parent = dialogFilter.container_filter)
+                }
+            }
+        })
+
+        viewModel.tagsFilter.observe(viewLifecycleOwner, Observer {
+            it?.let {
+
+                if (this::dialogFilter.isInitialized) {
+
+                    dialogFilter.tag_group.removeAll()
+
+                    for (str in it) {
+                        dialogFilter.tag_group.addTag(Tag(str).apply {
+                            radius = 30f
+                            isDeletable = true
+                            tagTextColor = Color.parseColor("#ffb33333")
+                            layoutColor = Color.parseColor("#00000000")
+                            layoutBorderColor = Color.parseColor("#ff131313")
+                            layoutBorderSize = 1f
+                            deleteIndicatorColor = Color.parseColor("#ff131313")
+                            layoutColorPress = Color.parseColor("#ffffff00")
+                        })
+                    }
+                }
+
+                if (it.isNotEmpty()) {
+                    viewModel.getAllNote(it)
+                }
+
+                else {
+                    // call to observer it normally by change value of LiveData
+                    viewModel.listNoteTitle.value?.let {
+                        listRoomNote = it
+
+                        noteAdapter.updateList(it, viewModel.startFilter.value!!, viewModel.endFilter.value!!)
+                        noteAdapter.filter.filter(queryString)
+
+                        activity!!.invalidateOptionsMenu()
+                    }
+                }
+            }
+        })
+
+        viewModel.listNoteFilter.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                if (viewModel.tagsFilter.value == null || viewModel.tagsFilter.value!!.isEmpty()) return@let
+
+                listRoomNote = it
+
+                noteAdapter.updateList(it, viewModel.startFilter.value!!, viewModel.endFilter.value!!)
+                noteAdapter.filter.filter(queryString)
+
+                activity!!.invalidateOptionsMenu()
+
+            }
+        })
         viewModel.listNoteTitle.observe(viewLifecycleOwner, Observer {
 
-            listRoomNote = it
+            it?.let {
+                if (viewModel.tagsFilter.value == null || viewModel.tagsFilter.value!!.isEmpty()) {
 
-            noteAdapter.updateList(it, viewModel.startFilter.value!!, viewModel.endFilter.value!!)
-            noteAdapter.filter.filter(queryString)
+                    listRoomNote = it
 
-            activity!!.invalidateOptionsMenu()
+                    noteAdapter.updateList(it, viewModel.startFilter.value!!, viewModel.endFilter.value!!)
+                    noteAdapter.filter.filter(queryString)
+
+                    activity!!.invalidateOptionsMenu()
+                }
+            }
         })
 
         viewModel.selectedPos.observe(viewLifecycleOwner, Observer {pos ->
@@ -343,6 +438,10 @@ class ListNotesFragment : Fragment(), ListNoteAdapter.NoteClickListener {
                 }
             }*/
 
+            R.id.app_bar_filter -> {
+                dialogFilter.show()
+            }
+
             R.id.app_bar_edit -> {
                 viewModel.selectedPos.postValue(RecyclerView.NO_POSITION)
 
@@ -392,16 +491,18 @@ class ListNotesFragment : Fragment(), ListNoteAdapter.NoteClickListener {
 
         viewModel.selectedPos.value?.let {
             if (it != RecyclerView.NO_POSITION) {
-                menu.findItem(R.id.app_bar_edit).setVisible(true)
-                menu.findItem(R.id.app_bar_delete).setVisible(true)
-                menu.findItem(R.id.app_bar_add).setVisible(false)
-                menu.findItem(R.id.app_bar_search).setVisible(false)
+                menu.findItem(R.id.app_bar_edit).isVisible = true
+                menu.findItem(R.id.app_bar_delete).isVisible = true
+                menu.findItem(R.id.app_bar_add).isVisible = false
+                menu.findItem(R.id.app_bar_search).isVisible = false
+                menu.findItem(R.id.app_bar_filter).setVisible(false)
             }
             else {
-                menu.findItem(R.id.app_bar_edit).setVisible(false)
-                menu.findItem(R.id.app_bar_delete).setVisible(false)
-                menu.findItem(R.id.app_bar_add).setVisible(true)
-                menu.findItem(R.id.app_bar_search).setVisible(true)
+                menu.findItem(R.id.app_bar_edit).isVisible = false
+                menu.findItem(R.id.app_bar_delete).isVisible = false
+                menu.findItem(R.id.app_bar_add).isVisible = true
+                menu.findItem(R.id.app_bar_search).isVisible = true
+                menu.findItem(R.id.app_bar_filter).setVisible(true)
             }
         }
     }
@@ -413,7 +514,7 @@ class ListNotesFragment : Fragment(), ListNoteAdapter.NoteClickListener {
         view?.requestFocus()
 
         view?.setOnKeyListener( View.OnKeyListener { v, keyCode, event ->
-            if( keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+            if( keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
 
                 if (viewModel.selectedPos.value!! != RecyclerView.NO_POSITION) {
                     viewModel.selectedPos.postValue(RecyclerView.NO_POSITION)

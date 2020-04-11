@@ -12,4 +12,20 @@
         <item name="windowMinWidthMajor">80%</item>
         <item name="android:windowMinWidthMajor">65%</item>
     </style>
+
+    <style name="Picture_Dialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@color/color_title_item</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleStyle">@null</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
 </resources>
